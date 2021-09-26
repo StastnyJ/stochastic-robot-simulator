@@ -73,7 +73,7 @@ def getInitialProbabilitiesMatrix(map, observation):
 def normalizeMatrix(matrix):
     return matrix
 
-def getBestInstruction(positionProbabilities, eus):
+def getBestInstruction(positionProbabilities, eus, instructions):
     return Instruction.UP
 
 
@@ -110,7 +110,7 @@ class Solution:
                 tm = self._transitionMatrixDown
             observationMatrix = buildObservationMatrix(self._environment.map, sensorsData)
             self._positionProbabilities = normalizeMatrix(np.matmul(observationMatrix, np.matmul(tm, self._positionProbabilities)))
-        res = getBestInstruction(self._positionProbabilities)
+        res = getBestInstruction(self._positionProbabilities, self._expectedUtilities, self._instructions)
         self._lastInstruction = res
         return (res, VisualizationData([[(0,0,255) if cell[0] == SpotType.FREE_PLACE else (255,0,0) for cell in row] for row in self._environment.map], self._euStr))
 

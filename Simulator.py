@@ -27,11 +27,10 @@ class Simulator:
         return self._env.map[row][col][0] == SpotType.WALL
 
     def getSensorValues(self) -> SensorData:
-        # TODO probabilities
-        upRes = self._getTrueWithProb(1) if self._isWall((self._pos[0] - 1, self._pos[1])) else self._getTrueWithProb(0)
-        leftRes = self._getTrueWithProb(1) if self._isWall((self._pos[0], self._pos[1] - 1)) else self._getTrueWithProb(0)
-        rightRes = self._getTrueWithProb(1) if self._isWall((self._pos[0], self._pos[1] + 1)) else self._getTrueWithProb(0)
-        downRes = self._getTrueWithProb(1) if self._isWall((self._pos[0] + 1, self._pos[1])) else self._getTrueWithProb(0)
+        upRes = self._getTrueWithProb(1 - self._falseWallProb) if self._isWall((self._pos[0] - 1, self._pos[1])) else self._getTrueWithProb(self._falseFreeProb)
+        leftRes = self._getTrueWithProb(1 - self._falseWallProb) if self._isWall((self._pos[0], self._pos[1] - 1)) else self._getTrueWithProb(self._falseFreeProb)
+        rightRes = self._getTrueWithProb(1 - self._falseWallProb) if self._isWall((self._pos[0], self._pos[1] + 1)) else self._getTrueWithProb(self._falseFreeProb)
+        downRes = self._getTrueWithProb(1 - self._falseWallProb) if self._isWall((self._pos[0] + 1, self._pos[1])) else self._getTrueWithProb(self._falseFreeProb)
 
         return SensorData(upRes, leftRes, rightRes, downRes)
 
