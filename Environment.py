@@ -1,12 +1,13 @@
-from enum import Enum
+from enum import IntEnum
 from typing import List, Tuple, Optional
+import json
 
-class SpotType(Enum):
+class SpotType(IntEnum):
     FREE_PLACE = 0
     WALL = 1
     TERMINAL = 2
 
-class Instruction(Enum):
+class Instruction(IntEnum):
     UP = 0
     LEFT = 1
     RIGHT = 2
@@ -24,10 +25,25 @@ class SensorData:
         self.right = right
         self.down = down
 
+    def __str__(self):
+        return str.join(";", [str(self.up), str(self.left), str(self.right), str(self.down)])
+
 class Environment:
     def __init__(self, map: List[List[Tuple[SpotType, float]]], stepPenalty: float):
         self.map = map
         self.stepPenalty = stepPenalty
+
+    def __str__(self):
+        return str.join(';', [
+            str(self.stepPenalty),
+            str(len(self.map)),
+            str(len(self.map[0])),
+            str.join(',', [
+                str.join(',', [
+                   str(int(cell[0])) + ("" if int(cell[0]) < 2 else str(cell[1])) for cell in row
+                ]) for row in self.map
+            ])
+        ])
 
     @staticmethod
     def build(rawMap: List[str], rewards: List[float], stepPenalty: float):
@@ -44,3 +60,6 @@ class Environment:
             res.append(actRow)
             
         return Environment(res, stepPenalty)
+
+    def toJson(self):
+        return '{"map": ' + json.dumps(self.map) + ', "stepPenalty": ' + str(self.stepPenalty) + '}'
