@@ -4,9 +4,9 @@ import json
 from sys import argv
 from Environment import Environment
 from Simulator import Simulator
-# from Solution import Solution
+from Solution import Solution
 from datetime import datetime
-from ExampleSolution import Solution
+# from ExampleSolution import Solution
 import sys
 
 def loadData(file: str):
