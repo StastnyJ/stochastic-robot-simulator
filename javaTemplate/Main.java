@@ -5,10 +5,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 import javaTemplate.Model.Environment;
+import javaTemplate.Model.SensorData;
 
 public class Main {
+
+    private static boolean GPS = false; // Change this to true if you want to solve GPS variant
+
     public static void main(String[] args) throws Exception {
         final ServerSocket srv = new ServerSocket(8080);
         Solution solution = null;
@@ -30,7 +35,14 @@ public class Main {
                         out.flush();
                     }
                     if (line != null && line.startsWith("STEP")) {
-                        Solution.Result res = solution.getInstruction();
+                        Solution.Result res;
+                        if (GPS) {
+                            Integer[] xy = Arrays.stream(line.substring(6).replace("(", "").replace(")", "").split(","))
+                                    .map(x -> Integer.parseInt(x)).toArray(Integer[]::new);
+                            res = solution.getInstructionGPS(xy[0], xy[1]);
+                        } else {
+                            res = solution.getInstruction(SensorData.parseSensorData(line.substring(6)));
+                        }
                         out.println(res.toString());
                         out.flush();
                     }

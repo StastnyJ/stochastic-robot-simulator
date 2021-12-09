@@ -55,7 +55,10 @@ if __name__ == "__main__":
             sensor = sim.getSensorValues()
 
             start = datetime.now()
-            s.sendall(b'STEP: ' + bytes(str(sensor) + "\n", "ascii"))
+            if GPS_ONLY:
+                s.sendall(b'STEP: ' + bytes(str(pos) + "\n", "ascii"))
+            else:
+                s.sendall(b'STEP: ' + bytes(str(sensor) + "\n", "ascii"))
             result = Instruction(int(s.recv(2).decode('ascii').strip()))
             end = datetime.now()
 
