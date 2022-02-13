@@ -1,10 +1,10 @@
-#!/usr/bin/python3.7
+#!/usr/bin/python3
 
 import json
 from sys import argv
 from Environment import Environment
 from Simulator import Simulator
-from Solution import Solution
+from ExampleSolution import Solution
 from datetime import datetime
 import sys
 
@@ -21,7 +21,7 @@ initLimit = 10
 instructionLimit = 0.5
 
 if __name__ == "__main__":
-    data = loadData(argv[1])
+    data = loadData( argv[1] if len(argv) > 1 else "environments/env0.json")
     for arg in argv[1:]:
         if arg.lower() == "novis":
             NO_VIS = True
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     pos = startPos
     history = []
     env = Environment.build(data['map'], data['rewards'], data['stepPenalty'])
-    sim = Simulator(env, startPos, 0.1, 0.2, 0.1, 5323)
+    sim = Simulator(env, startPos, 0.1, 0.2, 0.1, 5353)
 
     start = datetime.now()
     sol = Solution(env)

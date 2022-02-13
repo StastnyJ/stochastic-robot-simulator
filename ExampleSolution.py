@@ -52,29 +52,136 @@ def getBestInstruction(position: Tuple[int, int], eus, instructions) -> Instruct
             bestInstruction = instr
     return bestInstruction
 
-def printNumMatrix(arr, prec):
-    for row in arr[1:-1]:
-        for cell in row[1:-1]:
-            if len(cell) > 0:
-                print(str(round(float(cell), prec))[::-1].zfill(prec + 3)[::-1], end=" ")
-            else:
-                print(" " * (prec + 3), end=" ")
-        print()
-
 def buildTransitionMatrix(map, instruction):
-    return np.array([[0]])
+    tmSize = len(map) * len(map[0])
+    res = []
+    for i in range(tmSize):
+        actTMRow = [0.0] * tmSize
+        actMapRow = i // len(map[0])
+        actMapCol = i % len(map[0])
+
+        if map[actMapRow][actMapCol][0] == SpotType.FREE_PLACE:
+            if instruction == Instruction.UP:
+                if map[actMapRow + 1][actMapCol][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow + 1) * len(map[0]) + actMapCol] += 0.8
+                if map[actMapRow][actMapCol + 1][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol + 1] += 0.1
+                if map[actMapRow][actMapCol - 1][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol - 1] += 0.1
+
+                if map[actMapRow - 1][actMapCol][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.8
+                if map[actMapRow][actMapCol + 1][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.1
+                if map[actMapRow][actMapCol - 1][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.1            
+             
+            if instruction == Instruction.LEFT:
+                if map[actMapRow ][actMapCol + 1][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow ) * len(map[0]) + actMapCol + 1] += 0.8
+                if map[actMapRow - 1][actMapCol][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow - 1) * len(map[0]) + actMapCol] += 0.1
+                if map[actMapRow + 1][actMapCol][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow + 1) * len(map[0]) + actMapCol] += 0.1
+
+                if map[actMapRow][actMapCol - 1][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.8
+                if map[actMapRow - 1][actMapCol][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.1
+                if map[actMapRow + 1][actMapCol][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.1        
+                    
+            if instruction == Instruction.RIGHT:
+                if map[actMapRow][actMapCol - 1][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow ) * len(map[0]) + actMapCol - 1] += 0.8
+                if map[actMapRow - 1][actMapCol][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow - 1) * len(map[0]) + actMapCol] += 0.1
+                if map[actMapRow + 1][actMapCol][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow + 1) * len(map[0]) + actMapCol] += 0.1
+
+                if map[actMapRow][actMapCol + 1][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.8
+                if map[actMapRow - 1][actMapCol][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.1
+                if map[actMapRow + 1][actMapCol][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.1      
+                    
+            if instruction == Instruction.DOWN:
+                if map[actMapRow - 1][actMapCol][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow - 1) * len(map[0]) + actMapCol] += 0.8
+                if map[actMapRow][actMapCol + 1][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol + 1] += 0.1
+                if map[actMapRow][actMapCol - 1][0] == SpotType.FREE_PLACE:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol - 1] += 0.1
+
+                if map[actMapRow + 1][actMapCol][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.8
+                if map[actMapRow][actMapCol + 1][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.1
+                if map[actMapRow][actMapCol - 1][0] == SpotType.WALL:
+                    actTMRow[(actMapRow) * len(map[0]) + actMapCol] += 0.1      
+        res.append(actTMRow[:])
+
+    return np.array(res)
 
 def buildObservationMatrix(map, observation):
-    return np.array([[0]])
+    tmSize = len(map) * len(map[0])
+    res = []
+    for i in range(tmSize):
+        actOMRow = [0.0] * tmSize
+        row = i // len(map[0])
+        col = i % len(map[0])
 
-def getInitialProbabilitiesMatrix(map, observation):
-    return np.array([[0]])
+        if map[row][col][0] == SpotType.FREE_PLACE:
+            falseWalls = 0
+            falseFrees = 0
 
-def normalizeMatrix(matrix):
-    return matrix
+            if observation.up and map[row - 1][col] [0]!= SpotType.WALL:
+                falseWalls += 1
+            if not observation.up and map[row - 1][col][0] == SpotType.WALL:
+                falseWalls += 1
+            if observation.left and map[row][col - 1][0] != SpotType.WALL:
+                falseWalls += 1
+            if not observation.left and map[row][col - 1][0] == SpotType.WALL:
+                falseWalls += 1
+            if observation.right and map[row][col + 1][0] != SpotType.WALL:
+                falseWalls += 1
+            if not observation.right and map[row][col + 1][0] == SpotType.WALL:
+                falseWalls += 1
+            if observation.down and map[row + 1][col][0] != SpotType.WALL:
+                falseWalls += 1
+            if not observation.down and map[row + 1][col][0] == SpotType.WALL:
+                falseWalls += 1
 
-def getBestInstruction(positionProbabilities, eus, instructions):
-    return Instruction.UP
+            trueWals = 4 - falseWalls
+            trueFrees = 4 - falseFrees
+            actOMRow[i] = 0.8 * trueWals + 0.2 * falseWalls + 0.9 * trueFrees + 0.1 * falseFrees
+        res.append(actOMRow)
+    return np.array(res)
+
+def getInitialProbabilities(map, observation):
+    return normalize(np.matmul(buildObservationMatrix(map, observation), np.array([[1.0] for _ in range(len(map) * len(map[0]))])))
+
+def normalize(matrix):
+    return matrix / sum(matrix)
+
+def getExpectedTotalUtility(positionProbabilities, eus, instruction, mapWidth):
+    res = 0
+    for i, prob in enumerate(positionProbabilities):
+        if prob > 0.05:
+            res += prob * getExpectedUtility((i // mapWidth, i % mapWidth), instruction, eus)
+    return res
+
+def getBestTotalInstruction(positionProbabilities, eus, instructions, mapWidth):
+    bestUtility = -inf
+    bestInstruction = None
+    for instr in instructions:
+        actUtility = getExpectedTotalUtility(positionProbabilities, eus, instr, mapWidth)
+        if actUtility > bestUtility:
+            bestUtility = actUtility
+            bestInstruction = instr
+    return bestInstruction
+
 
 
 class Solution:
@@ -92,13 +199,13 @@ class Solution:
 
         self._expectedUtilities = [[0 if cellType == SpotType.FREE_PLACE else (-inf if cellType == SpotType.WALL else cellVal) for (cellType, cellVal) in row] for row in environment.map]
         euNoUpdate = [[False if cellType == SpotType.FREE_PLACE else True for (cellType, cellVal) in row] for row in environment.map]
-        for _ in range(10000):
+        for _ in range(1000):
             self._expectedUtilities = bellmanUpdate(self._expectedUtilities, euNoUpdate, self._environment.stepPenalty, self._instructions)
         self._euStr = [["" if self._expectedUtilities[row][cell] == -inf else str(round(self._expectedUtilities[row][cell], 4)) + "\n" + (getBestInstruction((row, cell),self._expectedUtilities, self._instructions).name if not euNoUpdate[row][cell] else "") for cell in range(len(self._expectedUtilities[row]))] for row in range(len(self._expectedUtilities))]
 
     def getInstruction(self, sensorsData: SensorData) -> Union[Instruction, Tuple[Instruction, Optional[VisualizationData]]]:
         if self._lastInstruction is None:
-            self._positionProbabilities = getInitialProbabilitiesMatrix(self._environment.map, sensorsData)
+            self._positionProbabilities = getInitialProbabilities(self._environment.map, sensorsData)
         else:
             if self._lastInstruction == Instruction.UP:
                 tm = self._transitionMatrixUp
@@ -109,10 +216,22 @@ class Solution:
             else:
                 tm = self._transitionMatrixDown
             observationMatrix = buildObservationMatrix(self._environment.map, sensorsData)
-            self._positionProbabilities = normalizeMatrix(np.matmul(observationMatrix, np.matmul(tm, self._positionProbabilities)))
-        res = getBestInstruction(self._positionProbabilities, self._expectedUtilities, self._instructions)
+            self._positionProbabilities = normalize(np.matmul(observationMatrix, np.matmul(tm, self._positionProbabilities)))
+        res = getBestTotalInstruction(self._positionProbabilities, self._expectedUtilities, self._instructions, len(self._environment.map[0]))
         self._lastInstruction = res
-        return (res, VisualizationData([[(0,0,255) if cell[0] == SpotType.FREE_PLACE else (255,0,0) for cell in row] for row in self._environment.map], self._euStr))
+        return (
+            res,
+            VisualizationData(
+                [
+                    [
+                        (int(255.0 * (1 - self._positionProbabilities[row * len(self._environment.map[0]) + col])),int(255.0 * (1 - self._positionProbabilities[row * len(self._environment.map[0]) + col])),255) if self._environment.map[row][col][0] == SpotType.FREE_PLACE else (255,0,0) 
+                            for col in range(len(self._environment.map[row]))
+                        ]
+                    for row in range(len(self._environment.map))
+                ],
+                self._euStr
+            )
+        )
 
     def getInstructionGPS(self, position: Tuple[int, int]) ->  Union[Instruction, Tuple[Instruction, Optional[VisualizationData]]]:
         return (getBestInstruction(position, self._expectedUtilities, self._instructions), VisualizationData(None, self._euStr))
